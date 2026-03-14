@@ -427,15 +427,27 @@
 
   async function clearAll() {
     const src = getDateFiltered();
-    if (!src.length) return;
-    if (!confirm('確定清空目前篩選的 '+src.length+' 筆訂單？')) return;
-    try {
-      const res = await fetch(API + '?action=clearAll');
-      const json = await res.json();
-      if (!json.success) throw new Error(json.message);
-      allOrders = []; renderHomeStats(); renderTable();
-      showToast('🗑 已清空');
-    } catch(e) { showToast('❌ 操作失敗：'+e.message); }
+    if (!src.length) { showToast('⚠️ 目前範圍沒有訂單'); return; }
+
+    const from = document.getElementById('dateFrom').value;
+    const to   = document.getElementById('dateTo').value;
+    const rangeText = (from === to) ? from : from + ' ～ ' + to;
+
+    if (!confirm('確定刪除【' + rangeText + '】的 ' + src.length + ' 筆訂單？\n（其他日期的訂單不受影響）')) return;
+
+    let failed = 0;
+    for (const o of src) {
+      try {
+        const res = await fetch(API + '?action=deleteOrder&id=' + encodeURIComponent(o['id']));
+        const json = await res.json();
+        if (!json.success) failed++;
+        else allOrders = allOrders.filter(x => String(x['id']) !== String(o['id']));
+      } catch(e) { failed++; }
+    }
+
+    renderHomeStats(); renderTable();
+    if (failed > 0) showToast('⚠️ 有 ' + failed + ' 筆刪除失敗');
+    else showToast('🗑 已刪除 ' + src.length + ' 筆訂單');
   }
 
   function exportCSV() {
