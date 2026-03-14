@@ -28,23 +28,6 @@
   }
   header p { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
 
-  /* API config */
-  #configBar {
-    background: rgba(245,166,35,0.10); border: 1.5px solid rgba(245,166,35,0.30);
-    border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
-    animation: fadeUp 0.4s ease 0.05s both; transition: opacity 0.3s;
-  }
-  #configBar p { color: var(--accent); font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; }
-  #configBar small { color: var(--muted); font-size: 0.75rem; display: block; margin-top: 6px; }
-  .api-input {
-    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: 10px; padding: 10px 14px; font-family: inherit; font-size: 0.85rem;
-    color: var(--text); outline: none; transition: border-color 0.2s;
-  }
-  .api-input:focus { border-color: var(--accent); }
-  .api-input::placeholder { color: var(--muted); }
-
-  /* Error */
   #errBox {
     background: rgba(231,76,60,0.15); border: 1.5px solid rgba(231,76,60,0.35);
     border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;
@@ -131,12 +114,6 @@
     <p id="dateDisp"></p>
   </header>
 
-  <div id="configBar">
-    <p>⚙️ 請先填入後台 API 網址（只需填一次）</p>
-    <input id="apiUrl" class="api-input" type="text" placeholder="貼上 Google Apps Script 部署網址…">
-    <small>網址填入後自動儲存，下次直接使用</small>
-  </div>
-
   <div id="errBox"></div>
 
   <div id="formArea">
@@ -185,6 +162,7 @@
 </div>
 
 <script>
+  const API = 'https://script.google.com/macros/s/AKfycbzPkhpKQcDJUeIDZvwnStiKLRmAEbYGA6zyxYaCnIJ3H-xFlqHnTOJ553CcOqua9oRy/exec';
   const PRICES = {lunch:120, breakfast:80};
   const SUBS = {beef:'牛肉', pork:'豬肉', chicken:'雞肉'};
   let meal = null, sub = null;
@@ -193,17 +171,6 @@
   document.getElementById('dateDisp').textContent =
     now.toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
   document.getElementById('orderDate').value = now.toISOString().split('T')[0];
-
-  // Load API URL
-  const urlEl = document.getElementById('apiUrl');
-  const saved = localStorage.getItem('meal_api_url') || '';
-  if (saved) { urlEl.value = saved; document.getElementById('configBar').style.opacity = '0.55'; }
-  urlEl.addEventListener('input', () => {
-    localStorage.setItem('meal_api_url', urlEl.value.trim());
-    document.getElementById('configBar').style.opacity = urlEl.value.trim() ? '0.55' : '1';
-  });
-
-  function getUrl() { return (urlEl.value.trim() || localStorage.getItem('meal_api_url') || ''); }
 
   function pickMeal(type) {
     meal = type; sub = null;
@@ -230,32 +197,31 @@
     const name = document.getElementById('personName').value.trim();
     const date = document.getElementById('orderDate').value;
     const note = document.getElementById('note').value.trim();
-    const apiUrl = getUrl();
 
     if (!name) return alert('請輸入姓名！');
     if (!date) return alert('請選擇訂餐日期！');
     if (!meal) return alert('請選擇品項！');
     if (meal==='lunch' && !sub) return alert('請選擇便當口味（牛肉/豬肉/雞肉）！');
-    if (!apiUrl) return alert('請先填入後台 API 網址！');
 
     const btn = document.getElementById('subBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spin"></span>送出中…';
 
-    const order = {
-      id: Date.now(),
-      name, meal,
+    const id = Date.now();
+    const time = now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+
+    // 用 GET + query string 方式送出，避免 CORS 問題
+    const params = new URLSearchParams({
+      action: 'addOrder',
+      id, name,
+      meal,
       sub: meal==='lunch' ? sub : '',
       price: PRICES[meal],
-      note, date,
-      time: new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})
-    };
+      note, date, time
+    });
 
     try {
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        body: JSON.stringify({action:'addOrder', order})
-      });
+      const res = await fetch(API + '?' + params.toString());
       const json = await res.json();
       if (!json.success) throw new Error(json.message || '伺服器回傳失敗');
 
@@ -270,7 +236,7 @@
          <div>💰 金額：<strong>$${PRICES[meal]}</strong></div>
          ${note?`<div>📝 備註：<strong>${esc(note)}</strong></div>`:''}`;
     } catch(e) {
-      showErr('❌ 送出失敗：' + e.message);
+      showErr('❌ 送出失敗：' + e.message + '　請確認網路是否正常');
       btn.disabled = false;
       btn.innerHTML = '送出訂單 →';
     }
