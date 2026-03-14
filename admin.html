@@ -295,7 +295,21 @@
       const res = await fetch(API + '?action=getOrders');
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
-      allOrders = json.orders || [];
+      allOrders = (json.orders || []).map(o => {
+        // 修正舊資料日期格式 2026-03-13T16:00:00.000Z → 2026-03-14（台灣時間）
+        let d = String(o['日期'] || '');
+        if (d.includes('T')) {
+          const tw = new Date(new Date(d).getTime() + 8 * 60 * 60 * 1000);
+          d = tw.toISOString().split('T')[0];
+          o['日期'] = d;
+        }
+        // 修正舊資料送出時間格式（1899... 數字）
+        let t = o['送出時間'];
+        if (typeof t === 'number' || (typeof t === 'string' && t.startsWith('1899'))) {
+          o['送出時間'] = '—';
+        }
+        return o;
+      });
       renderHomeStats();
       renderTable();
     } catch(e) {
