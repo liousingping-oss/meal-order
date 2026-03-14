@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訂餐後台 🍱</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F3EE; --card: #FFFFFF; --border: #E8DDD4;
+    --orange: #E8673C; --gold: #F5A623; --blue: #3B82F6; --green: #22C55E;
+    --text: #1C1208; --muted: #9E8A78; --shadow: 0 2px 20px rgba(28,18,8,0.08); --r: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .topbar {
+    background: var(--text); color: #F7F3EE; padding: 0 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 58px; position: sticky; top: 0; z-index: 100;
+  }
+  .topbar h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .topbar-r { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 1.4s infinite; }
+  .live-lbl { font-size: 0.75rem; color: #9E8A78; font-weight: 600; }
+  .top-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; padding: 7px 14px; color: #F7F3EE; font-family: inherit;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .top-btn:hover { background: rgba(255,255,255,0.2); }
+
+  .main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .stats { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 22px; animation: fadeUp 0.4s ease; }
+  .stat {
+    background: var(--card); border-radius: var(--r); box-shadow: var(--shadow);
+    padding: 18px 14px; text-align: center; border-bottom: 4px solid transparent; transition: transform 0.2s;
+  }
+  .stat:hover { transform: translateY(-2px); }
+  .stat.s0{border-color:var(--orange)} .stat.s1{border-color:#C0392B} .stat.s2{border-color:#E91E63}
+  .stat.s3{border-color:#FF9800} .stat.s4{border-color:var(--gold)} .stat.s5{border-color:var(--blue)}
+  .stat-icon { font-size: 1.5rem; margin-bottom: 5px; }
+  .stat-lbl { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 5px; }
+  .stat-num { font-size: 1.9rem; font-weight: 900; line-height: 1; }
+  .stat-sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+  .stat.s0 .stat-num{color:var(--orange)} .stat.s1 .stat-num{color:#C0392B} .stat.s2 .stat-num{color:#E91E63}
+  .stat.s3 .stat-num{color:#FF9800} .stat.s4 .stat-num{color:var(--gold)} .stat.s5 .stat-num{color:var(--blue)}
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .filters { display: flex; gap: 7px; flex-wrap: wrap; }
+  .fbtn {
+    padding: 7px 15px; border-radius: 20px; border: 2px solid var(--border);
+    background: none; font-family: inherit; font-size: 0.83rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: all 0.18s;
+  }
+  .fbtn.on { background: var(--text); color: white; border-color: var(--text); }
+  .fbtn:hover:not(.on) { border-color: var(--text); color: var(--text); }
+  .tbtn {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 8px 15px; font-family: inherit; font-size: 0.83rem; font-weight: 600;
+    cursor: pointer; color: var(--text); transition: all 0.18s; display: flex; align-items: center; gap: 5px;
+  }
+  .tbtn:hover { background: var(--text); color: white; border-color: var(--text); }
+  .tbtn.danger:hover { background: #E74C3C; border-color: #E74C3C; color: white; }
+
+  .tbl-wrap { background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; animation: fadeUp 0.4s ease 0.1s both; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.91rem; }
+  thead tr { background: #F7F3EE; border-bottom: 2px solid var(--border); }
+  th { padding: 12px 14px; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; white-space: nowrap; }
+  td { padding: 13px 14px; border-bottom: 1px solid #F0E8E0; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FBF7F3; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 0.79rem; font-weight: 700; white-space: nowrap; }
+  .b-lunch{background:#FFF0EB;color:var(--orange)} .b-breakfast{background:#FFFBF0;color:var(--gold)}
+  .b-beef{background:#FDECEC;color:#C0392B} .b-pork{background:#FCE4EC;color:#E91E63} .b-chicken{background:#FFF3E0;color:#FF9800}
+
+  .note-cell { max-width: 180px; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .note-cell.empty { color: var(--muted); }
+
+  .del { background: none; border: none; color: #D5C9BF; cursor: pointer; padding: 5px 8px; border-radius: 7px; font-size: 0.9rem; transition: all 0.15s; }
+  .del:hover { background: #FDECEC; color: #E74C3C; }
+
+  .grand { background: var(--text); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; border-radius: 0 0 var(--r) var(--r); }
+  .grand .amt { font-size: 1.25rem; font-weight: 900; color: var(--gold); }
+
+  .empty-state { text-align: center; padding: 56px 20px; color: var(--muted); }
+  .empty-state .ei { font-size: 2.8rem; margin-bottom: 10px; }
+
+  #loadOverlay { position: fixed; inset: 0; background: rgba(247,243,238,0.9); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+  #loadOverlay.hide { display: none; }
+  .big-spin { width: 42px; height: 42px; border: 4px solid #E8DDD4; border-top-color: var(--orange); border-radius: 50%; animation: rotating 0.8s linear infinite; }
+  #loadOverlay p { font-size: 0.95rem; color: var(--muted); font-weight: 600; }
+
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: white; padding: 11px 22px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 999; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  @keyframes rotating{to{transform:rotate(360deg)}}
+
+  @media(max-width:900px){
+    .stats{grid-template-columns:repeat(3,1fr)} .stat.s5{grid-column:span 3}
+  }
+  @media(max-width:600px){
+    .stats{grid-template-columns:repeat(2,1fr)} .stat.s5{grid-column:span 2}
+    .topbar{padding:0 14px} .main{padding:16px 12px 40px}
+  }
+</style>
+</head>
+<body>
+
+<div id="loadOverlay">
+  <div class="big-spin"></div>
+  <p>載入訂單中…</p>
+</div>
+
+<div class="topbar">
+  <h1>🍱 訂餐後台</h1>
+  <div class="topbar-r">
+    <div class="dot"></div><span class="live-lbl">LIVE</span>
+    <button class="top-btn" onclick="loadOrders()">↻ 重新整理</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats">
+    <div class="stat s0"><div class="stat-icon">🍱</div><div class="stat-lbl">便當總數</div><div class="stat-num" id="n0">0</div><div class="stat-sub" id="a0">$0</div></div>
+    <div class="stat s1"><div class="stat-icon">🐄</div><div class="stat-lbl">牛肉</div><div class="stat-num" id="n1">0</div><div class="stat-sub" id="a1">$0</div></div>
+    <div class="stat s2"><div class="stat-icon">🐷</div><div class="stat-lbl">豬肉</div><div class="stat-num" id="n2">0</div><div class="stat-sub" id="a2">$0</div></div>
+    <div class="stat s3"><div class="stat-icon">🐔</div><div class="stat-lbl">雞肉</div><div class="stat-num" id="n3">0</div><div class="stat-sub" id="a3">$0</div></div>
+    <div class="stat s4"><div class="stat-icon">🥪</div><div class="stat-lbl">早餐</div><div class="stat-num" id="n4">0</div><div class="stat-sub" id="a4">$0</div></div>
+    <div class="stat s5"><div class="stat-icon">💰</div><div class="stat-lbl">總金額</div><div class="stat-num" id="n5">$0</div><div class="stat-sub" id="a5">0 筆訂單</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters">
+      <button class="fbtn on" onclick="setFilter('all',this)">全部</button>
+      <button class="fbtn" onclick="setFilter('lunch',this)">🍱 便當</button>
+      <button class="fbtn" onclick="setFilter('beef',this)">🐄 牛肉</button>
+      <button class="fbtn" onclick="setFilter('pork',this)">🐷 豬肉</button>
+      <button class="fbtn" onclick="setFilter('chicken',this)">🐔 雞肉</button>
+      <button class="fbtn" onclick="setFilter('breakfast',this)">🥪 早餐</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="tbtn" onclick="exportCSV()">📥 匯出 CSV</button>
+      <button class="tbtn danger" onclick="clearAll()">🗑 清空</button>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>姓名</th><th>品項</th><th>口味</th><th>金額</th>
+        <th>備註</th><th>訂餐日期</th><th>送出時間</th><th></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="grand" class="grand" style="display:none">
+      <span id="grandLbl">共 0 筆</span><span class="amt" id="grandAmt">$0</span>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="ei">📭</div><p>目前沒有訂單</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://script.google.com/macros/s/AKfycbzPkhpKQcDJUeIDZvwnStiKLRmAEbYGA6zyxYaCnIJ3H-xFlqHnTOJ553CcOqua9oRy/exec';
+  const SUBS = {beef:'牛肉', pork:'豬肉', chicken:'雞肉'};
+  let orders = [], filter = 'all';
+
+  async function loadOrders() {
+    document.getElementById('loadOverlay').classList.remove('hide');
+    try {
+      const res = await fetch(API + '?action=getOrders');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+      orders = json.orders || [];
+      renderStats();
+      renderTable();
+    } catch(e) {
+      showToast('❌ 載入失敗：' + e.message);
+    }
+    document.getElementById('loadOverlay').classList.add('hide');
+  }
+
+  function renderStats() {
+    const lunch = orders.filter(o=>o['品項']==='lunch');
+    const beef  = orders.filter(o=>o['口味']==='beef');
+    const pork  = orders.filter(o=>o['口味']==='pork');
+    const chk   = orders.filter(o=>o['口味']==='chicken');
+    const bkf   = orders.filter(o=>o['品項']==='breakfast');
+    const total = orders.reduce((s,o)=>s+Number(o['金額']||0),0);
+
+    [[lunch.length,lunch.length*120],[beef.length,beef.length*120],[pork.length,pork.length*120],
+     [chk.length,chk.length*120],[bkf.length,bkf.length*80]].forEach(([n,a],i)=>{
+      document.getElementById('n'+i).textContent = n;
+      document.getElementById('a'+i).textContent = '$'+a.toLocaleString();
+    });
+    document.getElementById('n5').textContent = '$'+total.toLocaleString();
+    document.getElementById('a5').textContent = orders.length+' 筆訂單';
+  }
+
+  function renderTable() {
+    const filtered = filter==='all' ? orders
+      : filter==='lunch' ? orders.filter(o=>o['品項']==='lunch')
+      : filter==='breakfast' ? orders.filter(o=>o['品項']==='breakfast')
+      : orders.filter(o=>o['口味']===filter);
+
+    const tbody = document.getElementById('tbody');
+    const empty = document.getElementById('emptyState');
+    const grand = document.getElementById('grand');
+
+    if (!filtered.length) {
+      tbody.innerHTML=''; empty.style.display='block'; grand.style.display='none'; return;
+    }
+    empty.style.display='none'; grand.style.display='flex';
+
+    const total = filtered.reduce((s,o)=>s+Number(o['金額']||0),0);
+    document.getElementById('grandLbl').textContent = '共 '+filtered.length+' 筆訂單';
+    document.getElementById('grandAmt').textContent = '總計 $'+total.toLocaleString();
+
+    tbody.innerHTML = filtered.map((o,i)=>{
+      const m = o['品項'], sv = o['口味'], note = String(o['備註']||'').trim();
+      const mBadge = m==='lunch'?`<span class="badge b-lunch">🍱 便當</span>`:`<span class="badge b-breakfast">🥪 早餐</span>`;
+      const sBadge = sv?`<span class="badge b-${sv}">${sv==='beef'?'🐄':sv==='pork'?'🐷':'🐔'} ${SUBS[sv]||sv}</span>`:`<span style="color:var(--muted)">—</span>`;
+      const noteCls = note ? 'note-cell' : 'note-cell empty';
+      return `<tr>
+        <td style="color:var(--muted);font-size:0.8rem">${i+1}</td>
+        <td><strong>${esc(o['姓名']||'')}</strong></td>
+        <td>${mBadge}</td>
+        <td>${sBadge}</td>
+        <td style="font-weight:700">$${o['金額']}</td>
+        <td class="${noteCls}" title="${esc(note)}">${note?esc(note):'—'}</td>
+        <td style="color:var(--muted);font-size:0.82rem;white-space:nowrap">${o['日期']||'—'}</td>
+        <td style="color:var(--muted);font-size:0.82rem;white-space:nowrap">${o['送出時間']||'—'}</td>
+        <td><button class="del" onclick="deleteOrder('${o['id']}')">✕</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    renderTable();
+  }
+
+  async function deleteOrder(id) {
+    try {
+      const params = new URLSearchParams({action:'deleteOrder', id});
+      const res = await fetch(API + '?' + params);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+      orders = orders.filter(o=>String(o['id'])!==String(id));
+      renderStats(); renderTable();
+      showToast('🗑 已刪除');
+    } catch(e) { showToast('❌ 刪除失敗：'+e.message); }
+  }
+
+  async function clearAll() {
+    if (!orders.length) return;
+    if (!confirm('確定清空全部 '+orders.length+' 筆訂單？')) return;
+    try {
+      const res = await fetch(API + '?action=clearAll');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+      orders = []; renderStats(); renderTable();
+      showToast('🗑 已清空所有訂單');
+    } catch(e) { showToast('❌ 操作失敗：'+e.message); }
+  }
+
+  function exportCSV() {
+    if (!orders.length) { showToast('⚠️ 沒有訂單'); return; }
+    const hdr = ['姓名','品項','口味','金額','備註','訂餐日期','送出時間'];
+    const rows = orders.map(o=>[
+      o['姓名'], o['品項']==='lunch'?'便當':'早餐',
+      o['口味']?SUBS[o['口味']]||o['口味']:'',
+      o['金額'], o['備註']||'', o['日期']||'', o['送出時間']||''
+    ]);
+    const csv = [hdr,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+    a.download = '訂餐_'+new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')+'.csv';
+    a.click();
+    showToast('📥 匯出成功');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2500);
+  }
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  loadOrders();
+  setInterval(loadOrders, 15000);
+</script>
+</body>
+</html>

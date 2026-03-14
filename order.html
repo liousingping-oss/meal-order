@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日訂餐 🍱</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1A1208; --surface: #251B0C; --card: #2E2210; --border: #3D2E18;
+    --accent: #F5A623; --accent2: #E8673C; --text: #F5ECD8; --muted: #8A7360;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 15% 15%, rgba(245,166,35,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 85%, rgba(232,103,60,0.10) 0%, transparent 55%);
+  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 24px 18px 60px; position: relative; }
+
+  header { text-align: center; padding: 28px 0 22px; animation: fadeDown 0.5s ease; }
+  .logo { font-size: 3rem; display: block; margin-bottom: 6px; }
+  header h1 {
+    font-size: 1.9rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
+
+  /* API config */
+  #configBar {
+    background: rgba(245,166,35,0.10); border: 1.5px solid rgba(245,166,35,0.30);
+    border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
+    animation: fadeUp 0.4s ease 0.05s both; transition: opacity 0.3s;
+  }
+  #configBar p { color: var(--accent); font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; }
+  #configBar small { color: var(--muted); font-size: 0.75rem; display: block; margin-top: 6px; }
+  .api-input {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; font-family: inherit; font-size: 0.85rem;
+    color: var(--text); outline: none; transition: border-color 0.2s;
+  }
+  .api-input:focus { border-color: var(--accent); }
+  .api-input::placeholder { color: var(--muted); }
+
+  /* Error */
+  #errBox {
+    background: rgba(231,76,60,0.15); border: 1.5px solid rgba(231,76,60,0.35);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;
+    color: #FF8A80; font-size: 0.88rem; font-weight: 600; display: none;
+  }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 22px 20px; margin-bottom: 14px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .card-title { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+  .fi {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 13px 16px; font-family: inherit; font-size: 1rem;
+    color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .fi::placeholder { color: var(--muted); }
+  .fi:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,166,35,0.15); }
+  input[type="date"].fi { cursor: pointer; }
+  input[type="date"].fi::-webkit-calendar-picker-indicator { filter: invert(0.5) sepia(1) hue-rotate(10deg); cursor: pointer; }
+  textarea.fi { resize: none; height: 72px; }
+
+  .meal-opt {
+    background: var(--surface); border: 2px solid var(--border); border-radius: 14px;
+    padding: 16px 18px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; user-select: none;
+  }
+  .meal-opt:last-child { margin-bottom: 0; }
+  .meal-opt:hover { border-color: rgba(245,166,35,0.45); transform: translateX(3px); }
+  .meal-opt.sel-lunch { border-color: var(--accent2); background: rgba(232,103,60,0.12); }
+  .meal-opt.sel-breakfast { border-color: var(--accent); background: rgba(245,166,35,0.10); }
+  .ml { display: flex; align-items: center; gap: 12px; }
+  .mi { font-size: 1.8rem; }
+  .mn { font-weight: 700; font-size: 1rem; }
+  .ms { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+  .mp { font-size: 1.1rem; font-weight: 900; color: var(--accent); }
+  .meal-opt.sel-lunch .mp { color: var(--accent2); }
+
+  .subs { display: none; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 10px 0 2px; }
+  .subs.show { display: grid; }
+  .sub-btn {
+    background: var(--surface); border: 2px solid var(--border); border-radius: 10px;
+    padding: 10px 6px; text-align: center; cursor: pointer; font-family: inherit;
+    font-size: 0.88rem; font-weight: 600; color: var(--muted); transition: all 0.18s;
+  }
+  .sub-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .sub-btn.on { border-color: var(--accent2); background: rgba(232,103,60,0.15); color: var(--accent2); }
+  .si { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+
+  .submit-btn {
+    width: 100%; padding: 16px; border: none; border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #1A1208; font-family: inherit; font-size: 1.1rem; font-weight: 900;
+    cursor: pointer; transition: all 0.2s; margin-top: 4px;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,166,35,0.35); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .spin { display: inline-block; width: 16px; height: 16px; border: 3px solid rgba(28,18,8,0.3); border-top-color: #1A1208; border-radius: 50%; animation: rotating 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+
+  #successScreen { display: none; text-align: center; padding: 60px 20px; }
+  #successScreen.show { display: block; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  #formArea.hidden { display: none; }
+  .sicon { font-size: 4.5rem; display: block; margin-bottom: 16px; }
+  .stitle { font-size: 1.7rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+  .sdetail { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px; margin: 20px 0; text-align: left; font-size: 0.95rem; line-height: 2.2; }
+  .sdetail strong { color: var(--accent); }
+  .again-btn { background: none; border: 2px solid var(--border); border-radius: 12px; padding: 12px 24px; color: var(--muted); font-family: inherit; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .again-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes popIn { from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)} }
+  @keyframes rotating { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="logo">🍱</span>
+    <h1>今日訂餐</h1>
+    <p id="dateDisp"></p>
+  </header>
+
+  <div id="configBar">
+    <p>⚙️ 請先填入後台 API 網址（只需填一次）</p>
+    <input id="apiUrl" class="api-input" type="text" placeholder="貼上 Google Apps Script 部署網址…">
+    <small>網址填入後自動儲存，下次直接使用</small>
+  </div>
+
+  <div id="errBox"></div>
+
+  <div id="formArea">
+    <div class="card" style="animation-delay:0.10s">
+      <div class="card-title">👤 你的名字</div>
+      <input class="fi" id="personName" type="text" placeholder="請輸入姓名…" maxlength="20">
+    </div>
+
+    <div class="card" style="animation-delay:0.16s">
+      <div class="card-title">📅 訂餐日期</div>
+      <input class="fi" id="orderDate" type="date">
+    </div>
+
+    <div class="card" style="animation-delay:0.22s">
+      <div class="card-title">🍽 選擇品項</div>
+      <div class="meal-opt" id="opt-lunch" onclick="pickMeal('lunch')">
+        <div class="ml"><span class="mi">🍱</span><div><div class="mn">便當</div><div class="ms">牛肉 / 豬肉 / 雞肉</div></div></div>
+        <span class="mp">$120</span>
+      </div>
+      <div class="subs" id="sub-lunch">
+        <button class="sub-btn" onclick="pickSub('beef',this)"><span class="si">🐄</span>牛肉</button>
+        <button class="sub-btn" onclick="pickSub('pork',this)"><span class="si">🐷</span>豬肉</button>
+        <button class="sub-btn" onclick="pickSub('chicken',this)"><span class="si">🐔</span>雞肉</button>
+      </div>
+      <div class="meal-opt" id="opt-breakfast" onclick="pickMeal('breakfast')">
+        <div class="ml"><span class="mi">🥪</span><div><div class="mn">早餐</div><div class="ms">含飲料</div></div></div>
+        <span class="mp">$80</span>
+      </div>
+    </div>
+
+    <div class="card" style="animation-delay:0.28s">
+      <div class="card-title">📝 備註（選填）</div>
+      <textarea class="fi" id="note" placeholder="例：不加辣、飯少一點、去冰…"></textarea>
+    </div>
+
+    <button class="submit-btn" id="subBtn" onclick="submitOrder()">送出訂單 →</button>
+  </div>
+
+  <div id="successScreen">
+    <span class="sicon">✅</span>
+    <div class="stitle">訂餐成功！</div>
+    <p style="color:var(--muted)">你的訂單已送出 😋</p>
+    <div class="sdetail" id="sdetail"></div>
+    <button class="again-btn" onclick="reset()">重新填寫</button>
+  </div>
+</div>
+
+<script>
+  const PRICES = {lunch:120, breakfast:80};
+  const SUBS = {beef:'牛肉', pork:'豬肉', chicken:'雞肉'};
+  let meal = null, sub = null;
+
+  const now = new Date();
+  document.getElementById('dateDisp').textContent =
+    now.toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+  document.getElementById('orderDate').value = now.toISOString().split('T')[0];
+
+  // Load API URL
+  const urlEl = document.getElementById('apiUrl');
+  const saved = localStorage.getItem('meal_api_url') || '';
+  if (saved) { urlEl.value = saved; document.getElementById('configBar').style.opacity = '0.55'; }
+  urlEl.addEventListener('input', () => {
+    localStorage.setItem('meal_api_url', urlEl.value.trim());
+    document.getElementById('configBar').style.opacity = urlEl.value.trim() ? '0.55' : '1';
+  });
+
+  function getUrl() { return (urlEl.value.trim() || localStorage.getItem('meal_api_url') || ''); }
+
+  function pickMeal(type) {
+    meal = type; sub = null;
+    document.getElementById('opt-lunch').className = 'meal-opt' + (type==='lunch'?' sel-lunch':'');
+    document.getElementById('opt-breakfast').className = 'meal-opt' + (type==='breakfast'?' sel-breakfast':'');
+    const s = document.getElementById('sub-lunch');
+    if (type==='lunch') { s.classList.add('show'); s.querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('on')); }
+    else s.classList.remove('show');
+  }
+
+  function pickSub(v, btn) {
+    sub = v;
+    document.querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('errBox');
+    el.textContent = msg; el.style.display = 'block';
+    setTimeout(()=>el.style.display='none', 6000);
+  }
+
+  async function submitOrder() {
+    const name = document.getElementById('personName').value.trim();
+    const date = document.getElementById('orderDate').value;
+    const note = document.getElementById('note').value.trim();
+    const apiUrl = getUrl();
+
+    if (!name) return alert('請輸入姓名！');
+    if (!date) return alert('請選擇訂餐日期！');
+    if (!meal) return alert('請選擇品項！');
+    if (meal==='lunch' && !sub) return alert('請選擇便當口味（牛肉/豬肉/雞肉）！');
+    if (!apiUrl) return alert('請先填入後台 API 網址！');
+
+    const btn = document.getElementById('subBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span>送出中…';
+
+    const order = {
+      id: Date.now(),
+      name, meal,
+      sub: meal==='lunch' ? sub : '',
+      price: PRICES[meal],
+      note, date,
+      time: new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})
+    };
+
+    try {
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        body: JSON.stringify({action:'addOrder', order})
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || '伺服器回傳失敗');
+
+      document.getElementById('formArea').classList.add('hidden');
+      document.getElementById('successScreen').classList.add('show');
+
+      const label = meal==='lunch' ? `便當（${SUBS[sub]}）` : '早餐';
+      document.getElementById('sdetail').innerHTML =
+        `<div>👤 姓名：<strong>${esc(name)}</strong></div>
+         <div>📅 日期：<strong>${date}</strong></div>
+         <div>🍽 品項：<strong>${label}</strong></div>
+         <div>💰 金額：<strong>$${PRICES[meal]}</strong></div>
+         ${note?`<div>📝 備註：<strong>${esc(note)}</strong></div>`:''}`;
+    } catch(e) {
+      showErr('❌ 送出失敗：' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = '送出訂單 →';
+    }
+  }
+
+  function reset() {
+    meal = null; sub = null;
+    ['personName','note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('orderDate').value = now.toISOString().split('T')[0];
+    document.getElementById('opt-lunch').className = 'meal-opt';
+    document.getElementById('opt-breakfast').className = 'meal-opt';
+    document.getElementById('sub-lunch').classList.remove('show');
+    document.querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('on'));
+    document.getElementById('formArea').classList.remove('hidden');
+    document.getElementById('successScreen').classList.remove('show');
+    document.getElementById('subBtn').disabled = false;
+    document.getElementById('subBtn').innerHTML = '送出訂單 →';
+  }
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
