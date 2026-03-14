@@ -9,61 +9,99 @@
   :root {
     --bg: #F7F3EE; --card: #FFFFFF; --border: #E8DDD4;
     --orange: #E8673C; --gold: #F5A623; --blue: #3B82F6; --green: #22C55E;
-    --text: #1C1208; --muted: #9E8A78; --shadow: 0 2px 20px rgba(28,18,8,0.08); --r: 18px;
+    --red: #E74C3C; --text: #1C1208; --muted: #9E8A78;
+    --shadow: 0 2px 20px rgba(28,18,8,0.08); --r: 18px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+  /* Topbar */
   .topbar {
     background: var(--text); color: #F7F3EE; padding: 0 28px;
     display: flex; align-items: center; justify-content: space-between;
     height: 58px; position: sticky; top: 0; z-index: 100;
   }
-  .topbar h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .topbar h1 { font-size: 1.05rem; font-weight: 700; }
   .topbar-r { display: flex; align-items: center; gap: 10px; }
   .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 1.4s infinite; }
   .live-lbl { font-size: 0.75rem; color: #9E8A78; font-weight: 600; }
-  .top-btn {
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px; padding: 7px 14px; color: #F7F3EE; font-family: inherit;
-    font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
-  }
+  .top-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 7px 14px; color: #F7F3EE; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
   .top-btn:hover { background: rgba(255,255,255,0.2); }
 
   .main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
 
-  .stats { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 22px; animation: fadeUp 0.4s ease; }
+  /* Date filter bar */
+  .date-bar {
+    background: var(--card); border-radius: var(--r); box-shadow: var(--shadow);
+    padding: 16px 20px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    animation: fadeUp 0.3s ease;
+  }
+  .date-bar label { font-size: 0.82rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .date-input {
+    border: 2px solid var(--border); border-radius: 10px; padding: 8px 14px;
+    font-family: inherit; font-size: 0.92rem; color: var(--text);
+    background: var(--bg); outline: none; cursor: pointer; transition: border-color 0.2s;
+  }
+  .date-input:focus { border-color: var(--orange); }
+  .date-sep { color: var(--muted); font-weight: 700; }
+
+  .date-shortcuts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dsbtn {
+    padding: 6px 13px; border-radius: 20px; border: 2px solid var(--border);
+    background: none; font-family: inherit; font-size: 0.78rem; font-weight: 700;
+    color: var(--muted); cursor: pointer; transition: all 0.18s; white-space: nowrap;
+  }
+  .dsbtn:hover { border-color: var(--orange); color: var(--orange); }
+  .dsbtn.on { background: var(--orange); color: white; border-color: var(--orange); }
+
+  /* Stats section label */
+  .section-label {
+    font-size: 0.78rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label span { background: var(--orange); color: white; border-radius: 20px; padding: 2px 10px; font-size: 0.72rem; }
+  .section-label span.future { background: var(--blue); }
+
+  /* Stats grid */
+  .stats { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 8px; }
   .stat {
     background: var(--card); border-radius: var(--r); box-shadow: var(--shadow);
-    padding: 18px 14px; text-align: center; border-bottom: 4px solid transparent; transition: transform 0.2s;
+    padding: 16px 12px; text-align: center; border-bottom: 4px solid transparent; transition: transform 0.2s;
   }
   .stat:hover { transform: translateY(-2px); }
   .stat.s0{border-color:var(--orange)} .stat.s1{border-color:#C0392B} .stat.s2{border-color:#E91E63}
   .stat.s3{border-color:#FF9800} .stat.s4{border-color:var(--gold)} .stat.s5{border-color:var(--blue)}
-  .stat-icon { font-size: 1.5rem; margin-bottom: 5px; }
-  .stat-lbl { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 5px; }
-  .stat-num { font-size: 1.9rem; font-weight: 900; line-height: 1; }
-  .stat-sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+  .stat-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .stat-lbl { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 4px; }
+  .stat-num { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+  .stat-sub { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
   .stat.s0 .stat-num{color:var(--orange)} .stat.s1 .stat-num{color:#C0392B} .stat.s2 .stat-num{color:#E91E63}
   .stat.s3 .stat-num{color:#FF9800} .stat.s4 .stat-num{color:var(--gold)} .stat.s5 .stat-num{color:var(--blue)}
 
+  /* Future stats — blue tint */
+  .stats.future .stat { background: #F0F5FF; }
+  .stats.future .stat.s0{border-color:var(--blue)} .stats.future .stat.s1{border-color:#2563EB}
+  .stats.future .stat.s2{border-color:#7C3AED} .stats.future .stat.s3{border-color:#0891B2}
+  .stats.future .stat.s4{border-color:#0D9488} .stats.future .stat.s5{border-color:#1C1208}
+  .stats.future .stat.s0 .stat-num{color:var(--blue)} .stats.future .stat.s1 .stat-num{color:#2563EB}
+  .stats.future .stat.s2 .stat-num{color:#7C3AED} .stats.future .stat.s3 .stat-num{color:#0891B2}
+  .stats.future .stat.s4 .stat-num{color:#0D9488} .stats.future .stat.s5 .stat-num{color:var(--text)}
+
+  .stats-wrap { margin-bottom: 22px; animation: fadeUp 0.4s ease; }
+
+  /* Toolbar */
   .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
   .filters { display: flex; gap: 7px; flex-wrap: wrap; }
-  .fbtn {
-    padding: 7px 15px; border-radius: 20px; border: 2px solid var(--border);
-    background: none; font-family: inherit; font-size: 0.83rem; font-weight: 600;
-    color: var(--muted); cursor: pointer; transition: all 0.18s;
-  }
+  .fbtn { padding: 7px 15px; border-radius: 20px; border: 2px solid var(--border); background: none; font-family: inherit; font-size: 0.83rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.18s; }
   .fbtn.on { background: var(--text); color: white; border-color: var(--text); }
   .fbtn:hover:not(.on) { border-color: var(--text); color: var(--text); }
-  .tbtn {
-    background: var(--card); border: 1.5px solid var(--border); border-radius: 10px;
-    padding: 8px 15px; font-family: inherit; font-size: 0.83rem; font-weight: 600;
-    cursor: pointer; color: var(--text); transition: all 0.18s; display: flex; align-items: center; gap: 5px;
-  }
+  .tbtn { background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 15px; font-family: inherit; font-size: 0.83rem; font-weight: 600; cursor: pointer; color: var(--text); transition: all 0.18s; display: flex; align-items: center; gap: 5px; }
   .tbtn:hover { background: var(--text); color: white; border-color: var(--text); }
-  .tbtn.danger:hover { background: #E74C3C; border-color: #E74C3C; color: white; }
+  .tbtn.danger:hover { background: var(--red); border-color: var(--red); color: white; }
 
+  /* Table */
   .tbl-wrap { background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; animation: fadeUp 0.4s ease 0.1s both; }
   table { width: 100%; border-collapse: collapse; font-size: 0.91rem; }
   thead tr { background: #F7F3EE; border-bottom: 2px solid var(--border); }
@@ -71,27 +109,30 @@
   td { padding: 13px 14px; border-bottom: 1px solid #F0E8E0; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #FBF7F3; }
+  tr.is-today td { background: #FFFBF0; }
+  tr.is-future td { background: #F0F5FF; }
+  tr.is-past td { opacity: 0.65; }
 
   .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 0.79rem; font-weight: 700; white-space: nowrap; }
   .b-lunch{background:#FFF0EB;color:var(--orange)} .b-breakfast{background:#FFFBF0;color:var(--gold)}
   .b-beef{background:#FDECEC;color:#C0392B} .b-pork{background:#FCE4EC;color:#E91E63} .b-chicken{background:#FFF3E0;color:#FF9800}
+  .b-today{background:#FFF0EB;color:var(--orange);font-size:0.72rem}
+  .b-future{background:#EFF6FF;color:var(--blue);font-size:0.72rem}
+  .b-past{background:#F3F4F6;color:#9CA3AF;font-size:0.72rem}
 
   .note-cell { max-width: 180px; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .note-cell.empty { color: var(--muted); }
-
   .del { background: none; border: none; color: #D5C9BF; cursor: pointer; padding: 5px 8px; border-radius: 7px; font-size: 0.9rem; transition: all 0.15s; }
-  .del:hover { background: #FDECEC; color: #E74C3C; }
+  .del:hover { background: #FDECEC; color: var(--red); }
 
   .grand { background: var(--text); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; border-radius: 0 0 var(--r) var(--r); }
   .grand .amt { font-size: 1.25rem; font-weight: 900; color: var(--gold); }
-
   .empty-state { text-align: center; padding: 56px 20px; color: var(--muted); }
   .empty-state .ei { font-size: 2.8rem; margin-bottom: 10px; }
 
-  #loadOverlay { position: fixed; inset: 0; background: rgba(247,243,238,0.9); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+  #loadOverlay { position: fixed; inset: 0; background: rgba(247,243,238,0.92); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
   #loadOverlay.hide { display: none; }
   .big-spin { width: 42px; height: 42px; border: 4px solid #E8DDD4; border-top-color: var(--orange); border-radius: 50%; animation: rotating 0.8s linear infinite; }
-  #loadOverlay p { font-size: 0.95rem; color: var(--muted); font-weight: 600; }
 
   .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: white; padding: 11px 22px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 999; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
@@ -106,6 +147,7 @@
   @media(max-width:600px){
     .stats{grid-template-columns:repeat(2,1fr)} .stat.s5{grid-column:span 2}
     .topbar{padding:0 14px} .main{padding:16px 12px 40px}
+    .date-bar{gap:8px}
   }
 </style>
 </head>
@@ -125,15 +167,46 @@
 </div>
 
 <div class="main">
-  <div class="stats">
-    <div class="stat s0"><div class="stat-icon">🍱</div><div class="stat-lbl">便當總數</div><div class="stat-num" id="n0">0</div><div class="stat-sub" id="a0">$0</div></div>
-    <div class="stat s1"><div class="stat-icon">🐄</div><div class="stat-lbl">牛肉</div><div class="stat-num" id="n1">0</div><div class="stat-sub" id="a1">$0</div></div>
-    <div class="stat s2"><div class="stat-icon">🐷</div><div class="stat-lbl">豬肉</div><div class="stat-num" id="n2">0</div><div class="stat-sub" id="a2">$0</div></div>
-    <div class="stat s3"><div class="stat-icon">🐔</div><div class="stat-lbl">雞肉</div><div class="stat-num" id="n3">0</div><div class="stat-sub" id="a3">$0</div></div>
-    <div class="stat s4"><div class="stat-icon">🥪</div><div class="stat-lbl">早餐</div><div class="stat-num" id="n4">0</div><div class="stat-sub" id="a4">$0</div></div>
-    <div class="stat s5"><div class="stat-icon">💰</div><div class="stat-lbl">總金額</div><div class="stat-num" id="n5">$0</div><div class="stat-sub" id="a5">0 筆訂單</div></div>
+
+  <!-- Date filter bar -->
+  <div class="date-bar">
+    <label>📅 日期範圍</label>
+    <input type="date" class="date-input" id="dateFrom">
+    <span class="date-sep">～</span>
+    <input type="date" class="date-input" id="dateTo">
+    <div class="date-shortcuts">
+      <button class="dsbtn on" id="ds-today" onclick="setDateShortcut('today')">今天</button>
+      <button class="dsbtn" id="ds-tomorrow" onclick="setDateShortcut('tomorrow')">明天</button>
+      <button class="dsbtn" id="ds-week" onclick="setDateShortcut('week')">本週</button>
+      <button class="dsbtn" id="ds-future" onclick="setDateShortcut('future')">未來所有</button>
+      <button class="dsbtn" id="ds-all" onclick="setDateShortcut('all')">全部</button>
+    </div>
   </div>
 
+  <!-- Stats: Today & Future -->
+  <div class="stats-wrap">
+    <div class="section-label">📊 今日統計 <span id="todayDateLabel"></span></div>
+    <div class="stats" id="statsToday">
+      <div class="stat s0"><div class="stat-icon">🍱</div><div class="stat-lbl">便當</div><div class="stat-num" id="t0">0</div><div class="stat-sub" id="ta0">$0</div></div>
+      <div class="stat s1"><div class="stat-icon">🐄</div><div class="stat-lbl">牛肉</div><div class="stat-num" id="t1">0</div><div class="stat-sub" id="ta1">$0</div></div>
+      <div class="stat s2"><div class="stat-icon">🐷</div><div class="stat-lbl">豬肉</div><div class="stat-num" id="t2">0</div><div class="stat-sub" id="ta2">$0</div></div>
+      <div class="stat s3"><div class="stat-icon">🐔</div><div class="stat-lbl">雞肉</div><div class="stat-num" id="t3">0</div><div class="stat-sub" id="ta3">$0</div></div>
+      <div class="stat s4"><div class="stat-icon">🥪</div><div class="stat-lbl">早餐</div><div class="stat-num" id="t4">0</div><div class="stat-sub" id="ta4">$0</div></div>
+      <div class="stat s5"><div class="stat-icon">💰</div><div class="stat-lbl">今日總計</div><div class="stat-num" id="t5">$0</div><div class="stat-sub" id="ta5">0 筆</div></div>
+    </div>
+
+    <div class="section-label" style="margin-top:16px">🔮 未來訂單 <span class="future" id="futureLabel"></span></div>
+    <div class="stats future" id="statsFuture">
+      <div class="stat s0"><div class="stat-icon">🍱</div><div class="stat-lbl">便當</div><div class="stat-num" id="f0">0</div><div class="stat-sub" id="fa0">$0</div></div>
+      <div class="stat s1"><div class="stat-icon">🐄</div><div class="stat-lbl">牛肉</div><div class="stat-num" id="f1">0</div><div class="stat-sub" id="fa1">$0</div></div>
+      <div class="stat s2"><div class="stat-icon">🐷</div><div class="stat-lbl">豬肉</div><div class="stat-num" id="f2">0</div><div class="stat-sub" id="fa2">$0</div></div>
+      <div class="stat s3"><div class="stat-icon">🐔</div><div class="stat-lbl">雞肉</div><div class="stat-num" id="f3">0</div><div class="stat-sub" id="fa3">$0</div></div>
+      <div class="stat s4"><div class="stat-icon">🥪</div><div class="stat-lbl">早餐</div><div class="stat-num" id="f4">0</div><div class="stat-sub" id="fa4">$0</div></div>
+      <div class="stat s5"><div class="stat-icon">💰</div><div class="stat-lbl">未來總計</div><div class="stat-num" id="f5">$0</div><div class="stat-sub" id="fa5">0 筆</div></div>
+    </div>
+  </div>
+
+  <!-- Table toolbar -->
   <div class="toolbar">
     <div class="filters">
       <button class="fbtn on" onclick="setFilter('all',this)">全部</button>
@@ -161,7 +234,7 @@
       <span id="grandLbl">共 0 筆</span><span class="amt" id="grandAmt">$0</span>
     </div>
     <div id="emptyState" class="empty-state" style="display:none">
-      <div class="ei">📭</div><p>目前沒有訂單</p>
+      <div class="ei">📭</div><p>此日期範圍沒有訂單</p>
     </div>
   </div>
 </div>
@@ -171,16 +244,59 @@
 <script>
   const API = 'https://script.google.com/macros/s/AKfycbzPkhpKQcDJUeIDZvwnStiKLRmAEbYGA6zyxYaCnIJ3H-xFlqHnTOJ553CcOqua9oRy/exec';
   const SUBS = {beef:'牛肉', pork:'豬肉', chicken:'雞肉'};
-  let orders = [], filter = 'all';
+  let allOrders = [], filter = 'all';
 
+  const today = new Date().toISOString().split('T')[0];
+
+  // Init date inputs & label
+  document.getElementById('todayDateLabel').textContent = today;
+  setDateShortcut('today');
+
+  // ── Date shortcuts ──
+  function setDateShortcut(key) {
+    const t = new Date();
+    const fmt = d => d.toISOString().split('T')[0];
+    let from, to;
+
+    if (key==='today')    { from = fmt(t); to = fmt(t); }
+    else if (key==='tomorrow') {
+      const tm = new Date(t); tm.setDate(tm.getDate()+1);
+      from = fmt(tm); to = fmt(tm);
+    }
+    else if (key==='week') {
+      const end = new Date(t); end.setDate(end.getDate()+6);
+      from = fmt(t); to = fmt(end);
+    }
+    else if (key==='future') {
+      const end = new Date(t); end.setFullYear(end.getFullYear()+1);
+      from = fmt(t); to = fmt(end);
+    }
+    else { from = '2000-01-01'; to = '2099-12-31'; }
+
+    document.getElementById('dateFrom').value = from;
+    document.getElementById('dateTo').value = to;
+    document.querySelectorAll('.dsbtn').forEach(b=>b.classList.remove('on'));
+    document.getElementById('ds-'+key).classList.add('on');
+    renderTable();
+  }
+
+  // Clear shortcut highlight when user manually picks date
+  ['dateFrom','dateTo'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=>{
+      document.querySelectorAll('.dsbtn').forEach(b=>b.classList.remove('on'));
+      renderTable();
+    });
+  });
+
+  // ── Load from API ──
   async function loadOrders() {
     document.getElementById('loadOverlay').classList.remove('hide');
     try {
       const res = await fetch(API + '?action=getOrders');
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
-      orders = json.orders || [];
-      renderStats();
+      allOrders = json.orders || [];
+      renderHomeStats();
       renderTable();
     } catch(e) {
       showToast('❌ 載入失敗：' + e.message);
@@ -188,55 +304,89 @@
     document.getElementById('loadOverlay').classList.add('hide');
   }
 
-  function renderStats() {
-    const lunch = orders.filter(o=>o['品項']==='lunch');
-    const beef  = orders.filter(o=>o['口味']==='beef');
-    const pork  = orders.filter(o=>o['口味']==='pork');
-    const chk   = orders.filter(o=>o['口味']==='chicken');
-    const bkf   = orders.filter(o=>o['品項']==='breakfast');
-    const total = orders.reduce((s,o)=>s+Number(o['金額']||0),0);
+  // ── Home stats: today vs future ──
+  function renderHomeStats() {
+    const todayOrders  = allOrders.filter(o => o['日期'] === today);
+    const futureOrders = allOrders.filter(o => o['日期'] > today);
+
+    fillStats(todayOrders,  't', 'ta');
+    fillStats(futureOrders, 'f', 'fa');
+
+    document.getElementById('futureLabel').textContent = futureOrders.length + ' 筆';
+  }
+
+  function fillStats(src, nPre, aPre) {
+    const lunch = src.filter(o=>o['品項']==='lunch');
+    const beef  = src.filter(o=>o['口味']==='beef');
+    const pork  = src.filter(o=>o['口味']==='pork');
+    const chk   = src.filter(o=>o['口味']==='chicken');
+    const bkf   = src.filter(o=>o['品項']==='breakfast');
+    const total = src.reduce((s,o)=>s+Number(o['金額']||0),0);
 
     [[lunch.length,lunch.length*120],[beef.length,beef.length*120],[pork.length,pork.length*120],
      [chk.length,chk.length*120],[bkf.length,bkf.length*80]].forEach(([n,a],i)=>{
-      document.getElementById('n'+i).textContent = n;
-      document.getElementById('a'+i).textContent = '$'+a.toLocaleString();
+      document.getElementById(nPre+i).textContent = n;
+      document.getElementById(aPre+i).textContent = '$'+a.toLocaleString();
     });
-    document.getElementById('n5').textContent = '$'+total.toLocaleString();
-    document.getElementById('a5').textContent = orders.length+' 筆訂單';
+    document.getElementById(nPre+'5').textContent = '$'+total.toLocaleString();
+    document.getElementById(aPre+'5').textContent = src.length+' 筆';
+  }
+
+  // ── Table render ──
+  function getDateFiltered() {
+    const from = document.getElementById('dateFrom').value;
+    const to   = document.getElementById('dateTo').value;
+    if (!from && !to) return allOrders;
+    return allOrders.filter(o => {
+      const d = o['日期'] || '';
+      return (!from || d >= from) && (!to || d <= to);
+    });
   }
 
   function renderTable() {
-    const filtered = filter==='all' ? orders
-      : filter==='lunch' ? orders.filter(o=>o['品項']==='lunch')
-      : filter==='breakfast' ? orders.filter(o=>o['品項']==='breakfast')
-      : orders.filter(o=>o['口味']===filter);
+    let src = getDateFiltered();
+
+    // meal/sub filter
+    if (filter !== 'all') {
+      if (filter==='lunch') src = src.filter(o=>o['品項']==='lunch');
+      else if (filter==='breakfast') src = src.filter(o=>o['品項']==='breakfast');
+      else src = src.filter(o=>o['口味']===filter);
+    }
+
+    // sort by date asc
+    src = [...src].sort((a,b)=>(a['日期']||'').localeCompare(b['日期']||''));
 
     const tbody = document.getElementById('tbody');
     const empty = document.getElementById('emptyState');
     const grand = document.getElementById('grand');
 
-    if (!filtered.length) {
+    if (!src.length) {
       tbody.innerHTML=''; empty.style.display='block'; grand.style.display='none'; return;
     }
     empty.style.display='none'; grand.style.display='flex';
 
-    const total = filtered.reduce((s,o)=>s+Number(o['金額']||0),0);
-    document.getElementById('grandLbl').textContent = '共 '+filtered.length+' 筆訂單';
+    const total = src.reduce((s,o)=>s+Number(o['金額']||0),0);
+    document.getElementById('grandLbl').textContent = '共 '+src.length+' 筆訂單';
     document.getElementById('grandAmt').textContent = '總計 $'+total.toLocaleString();
 
-    tbody.innerHTML = filtered.map((o,i)=>{
+    tbody.innerHTML = src.map((o,i)=>{
+      const d = o['日期'] || '';
+      const rowCls = d === today ? 'is-today' : d > today ? 'is-future' : 'is-past';
+      const dateBadge = d === today
+        ? `<span class="badge b-today">今天</span> `
+        : d > today ? `<span class="badge b-future">未來</span> ` : `<span class="badge b-past">過去</span> `;
       const m = o['品項'], sv = o['口味'], note = String(o['備註']||'').trim();
       const mBadge = m==='lunch'?`<span class="badge b-lunch">🍱 便當</span>`:`<span class="badge b-breakfast">🥪 早餐</span>`;
       const sBadge = sv?`<span class="badge b-${sv}">${sv==='beef'?'🐄':sv==='pork'?'🐷':'🐔'} ${SUBS[sv]||sv}</span>`:`<span style="color:var(--muted)">—</span>`;
       const noteCls = note ? 'note-cell' : 'note-cell empty';
-      return `<tr>
+      return `<tr class="${rowCls}">
         <td style="color:var(--muted);font-size:0.8rem">${i+1}</td>
         <td><strong>${esc(o['姓名']||'')}</strong></td>
         <td>${mBadge}</td>
         <td>${sBadge}</td>
         <td style="font-weight:700">$${o['金額']}</td>
         <td class="${noteCls}" title="${esc(note)}">${note?esc(note):'—'}</td>
-        <td style="color:var(--muted);font-size:0.82rem;white-space:nowrap">${o['日期']||'—'}</td>
+        <td style="font-size:0.82rem;white-space:nowrap">${dateBadge}${d||'—'}</td>
         <td style="color:var(--muted);font-size:0.82rem;white-space:nowrap">${o['送出時間']||'—'}</td>
         <td><button class="del" onclick="deleteOrder('${o['id']}')">✕</button></td>
       </tr>`;
@@ -252,32 +402,33 @@
 
   async function deleteOrder(id) {
     try {
-      const params = new URLSearchParams({action:'deleteOrder', id});
-      const res = await fetch(API + '?' + params);
+      const res = await fetch(API + '?action=deleteOrder&id=' + encodeURIComponent(id));
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
-      orders = orders.filter(o=>String(o['id'])!==String(id));
-      renderStats(); renderTable();
+      allOrders = allOrders.filter(o=>String(o['id'])!==String(id));
+      renderHomeStats(); renderTable();
       showToast('🗑 已刪除');
     } catch(e) { showToast('❌ 刪除失敗：'+e.message); }
   }
 
   async function clearAll() {
-    if (!orders.length) return;
-    if (!confirm('確定清空全部 '+orders.length+' 筆訂單？')) return;
+    const src = getDateFiltered();
+    if (!src.length) return;
+    if (!confirm('確定清空目前篩選的 '+src.length+' 筆訂單？')) return;
     try {
       const res = await fetch(API + '?action=clearAll');
       const json = await res.json();
       if (!json.success) throw new Error(json.message);
-      orders = []; renderStats(); renderTable();
-      showToast('🗑 已清空所有訂單');
+      allOrders = []; renderHomeStats(); renderTable();
+      showToast('🗑 已清空');
     } catch(e) { showToast('❌ 操作失敗：'+e.message); }
   }
 
   function exportCSV() {
-    if (!orders.length) { showToast('⚠️ 沒有訂單'); return; }
+    const src = getDateFiltered();
+    if (!src.length) { showToast('⚠️ 沒有訂單'); return; }
     const hdr = ['姓名','品項','口味','金額','備註','訂餐日期','送出時間'];
-    const rows = orders.map(o=>[
+    const rows = src.map(o=>[
       o['姓名'], o['品項']==='lunch'?'便當':'早餐',
       o['口味']?SUBS[o['口味']]||o['口味']:'',
       o['金額'], o['備註']||'', o['日期']||'', o['送出時間']||''

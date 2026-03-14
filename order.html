@@ -28,7 +28,13 @@
   }
   header p { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
 
-  #errBox {
+  #cutoffNotice {
+    display: none;
+    background: rgba(232,103,60,0.15); border: 1.5px solid rgba(232,103,60,0.4);
+    border-radius: 14px; padding: 13px 18px; margin-bottom: 16px;
+    color: var(--accent2); font-size: 0.88rem; font-weight: 600;
+    align-items: center; gap: 8px; animation: fadeUp 0.4s ease both;
+  }
     background: rgba(231,76,60,0.15); border: 1.5px solid rgba(231,76,60,0.35);
     border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;
     color: #FF8A80; font-size: 0.88rem; font-weight: 600; display: none;
@@ -114,6 +120,7 @@
     <p id="dateDisp"></p>
   </header>
 
+  <div id="cutoffNotice">⏰ 已超過今日 18:00 截止時間，最早只能訂<strong style="margin-left:4px">後天</strong>的餐點</div>
   <div id="errBox"></div>
 
   <div id="formArea">
@@ -167,10 +174,35 @@
   const SUBS = {beef:'牛肉', pork:'豬肉', chicken:'雞肉'};
   let meal = null, sub = null;
 
+  // 使用台灣時間 (UTC+8)
   const now = new Date();
+  const twNow = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 轉台灣時間
+  const twHour = twNow.getUTCHours(); // 台灣目前幾點
+  const twToday = twNow.toISOString().split('T')[0]; // 台灣今天日期
+
+  // 計算可訂的最早日期與最晚日期
+  // 只能訂隔天；18:00 後隔天截止，最早只能訂後天
+  function getMinDate() {
+    const base = new Date(twNow);
+    base.setUTCDate(base.getUTCDate() + (twHour >= 18 ? 2 : 1));
+    return base.toISOString().split('T')[0];
+  }
+
+  const minDate = getMinDate();
+
+  // 日期選擇器限制
+  const dateEl = document.getElementById('orderDate');
+  dateEl.min = minDate;
+  dateEl.value = minDate;
+
+  // 如果現在超過 18:00，顯示提示
+  const cutoffNotice = document.getElementById('cutoffNotice');
+  if (twHour >= 18) {
+    cutoffNotice.style.display = 'flex';
+  }
+
   document.getElementById('dateDisp').textContent =
-    now.toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
-  document.getElementById('orderDate').value = now.toISOString().split('T')[0];
+    now.toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long', timeZone:'Asia/Taipei'});
 
   function pickMeal(type) {
     meal = type; sub = null;
@@ -208,7 +240,7 @@
     btn.innerHTML = '<span class="spin"></span>送出中…';
 
     const id = Date.now();
-    const time = now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    const time = now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit', hour12:false, timeZone:'Asia/Taipei'});
 
     // 用 GET + query string 方式送出，避免 CORS 問題
     const params = new URLSearchParams({
@@ -245,7 +277,7 @@
   function reset() {
     meal = null; sub = null;
     ['personName','note'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('orderDate').value = now.toISOString().split('T')[0];
+    document.getElementById('orderDate').value = minDate;
     document.getElementById('opt-lunch').className = 'meal-opt';
     document.getElementById('opt-breakfast').className = 'meal-opt';
     document.getElementById('sub-lunch').classList.remove('show');
